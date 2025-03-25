@@ -10,7 +10,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
     
     body {
@@ -38,61 +38,61 @@
     .timer-container {
       display: flex;
       justify-content: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     
     .timer-button {
-      width: 160px;
-      height: 160px;
+      width: 150px;
+      height: 150px;
       border-radius: 50%;
+      border: none;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      border: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       transition: all 0.3s ease;
-      color: white;
-      outline: none;
-      position: relative;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
     
     .timer-button.idle {
-      background: linear-gradient(135deg, #9f7aea, #6b46c1);
+      background: linear-gradient(135deg, #9333ea, #6b21a8);
     }
     
     .timer-button.active {
-      background: linear-gradient(135deg, #f56565, #c53030);
-      animation: pulse 2s infinite;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      animation: pulse 1.5s infinite;
     }
     
     @keyframes pulse {
-      0%, 100% {
+      0% {
         transform: scale(1);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       }
       50% {
         transform: scale(1.05);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+      100% {
+        transform: scale(1);
       }
     }
     
-    .timer-clock {
-      font-size: 28px;
-      font-weight: bold;
+    .timer-icon {
+      width: 32px;
+      height: 32px;
+      stroke: white;
       margin-bottom: 5px;
     }
     
-    .timer-label {
-      font-size: 16px;
-      opacity: 0.9;
+    .timer-clock {
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
     }
     
-    .timer-icon {
-      margin-bottom: 10px;
-      width: 28px;
-      height: 28px;
+    .timer-label {
+      color: white;
+      font-size: 14px;
+      margin-top: 5px;
     }
     
     /* Action buttons */
@@ -104,42 +104,38 @@
     
     .btn {
       padding: 10px 15px;
-      border-radius: 8px;
+      border-radius: 6px;
       border: none;
       font-weight: 500;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      transition: background-color 0.2s;
-      font-size: 14px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .btn-reset {
       background-color: white;
-      color: #333;
-      border: 1px solid #ddd;
+      color: #64748b;
     }
     
     .btn-reset:hover {
-      background-color: #f8f8f8;
+      background-color: #f8fafc;
     }
     
     .btn-download {
-      background-color: #10b981;
+      background-color: #16a34a;
       color: white;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     
     .btn-download:hover {
-      background-color: #059669;
+      background-color: #15803d;
     }
     
     .btn-download:disabled {
-      background-color: #cbd5e0;
+      background-color: #d1d5db;
       cursor: not-allowed;
-    }
-    
-    .btn svg {
-      margin-left: 5px;
     }
     
     /* Contractions list */
@@ -153,6 +149,9 @@
       font-size: 14px;
       margin: 8px 0;
       animation: fadeIn 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
     
     .contraction-card {
@@ -209,52 +208,55 @@
     /* Toast notifications */
     .toast-container {
       position: fixed;
-      top: 20px;
-      left: 20px;
-      width: 300px;
-      z-index: 1000;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
     }
     
     .toast {
       background-color: white;
       border-radius: 8px;
-      padding: 12px 15px;
-      margin-bottom: 10px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-      animation: slideIn 0.3s ease, fadeOut 0.5s ease 4.5s forwards;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 12px 16px;
+      margin-top: 10px;
+      min-width: 300px;
+      max-width: 400px;
+      animation: slideIn 0.3s, fadeOut 0.5s 4.5s;
+      animation-fill-mode: forwards;
       position: relative;
-      overflow: hidden;
     }
     
-    .toast:before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background-color: #6b46c1;
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(10px);
+      }
     }
     
     .toast-title {
       font-weight: bold;
-      margin-bottom: 3px;
-      font-size: 14px;
+      margin-bottom: 4px;
+      color: #1e293b;
     }
     
     .toast-message {
-      font-size: 13px;
-      color: #4a5568;
-    }
-    
-    @keyframes slideIn {
-      from { transform: translateX(-100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; visibility: hidden; }
+      color: #64748b;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -334,8 +336,11 @@
           startTime: now,
           endTime: null,
           duration: null,
-          interval: contractions.length > 0 
+          intervalFromStart: contractions.length > 0 
             ? Math.floor((now.getTime() - contractions[contractions.length - 1].startTime.getTime()) / 1000) 
+            : null,
+          intervalFromEnd: contractions.length > 0 && contractions[contractions.length - 1].endTime
+            ? Math.floor((now.getTime() - contractions[contractions.length - 1].endTime.getTime()) / 1000) 
             : null
         };
         
@@ -429,10 +434,22 @@
       // Add contractions
       contractions.forEach((contraction, index) => {
         // Add interval info (if not first contraction)
-        if (index > 0 && contraction.interval) {
+        if (index > 0) {
           const intervalElement = document.createElement('div');
           intervalElement.className = 'contraction-interval';
-          intervalElement.textContent = `הפרש: ${formatTime(contraction.interval)}`;
+          
+          if (contraction.intervalFromStart !== null) {
+            const intervalStartElement = document.createElement('div');
+            intervalStartElement.textContent = `הפרש מתחילת ציר קודם עד תחילת ציר נוכחי: ${formatTime(contraction.intervalFromStart)}`;
+            intervalElement.appendChild(intervalStartElement);
+          }
+          
+          if (contraction.intervalFromEnd !== null) {
+            const intervalEndElement = document.createElement('div');
+            intervalEndElement.textContent = `הפרש מסוף ציר קודם עד תחילת ציר נוכחי: ${formatTime(contraction.intervalFromEnd)}`;
+            intervalElement.appendChild(intervalEndElement);
+          }
+          
           contractionsList.appendChild(intervalElement);
         }
         
@@ -496,22 +513,24 @@
     function downloadData() {
       if (contractions.length === 0) return;
       
-      // Create CSV content
-      let csvContent = "מספר ציר,זמן התחלה,זמן סיום,משך ציר (דקות:שניות),הפרש מהציר הקודם (דקות:שניות)\n";
+      // Create CSV content with BOM for proper Hebrew encoding
+      let csvContent = "\uFEFF" + "מספר ציר,זמן התחלה,זמן סיום,משך ציר (דקות:שניות),הפרש מתחילת ציר קודם (דקות:שניות),הפרש מסוף ציר קודם (דקות:שניות)\n";
       
       contractions.forEach((contraction, index) => {
         const startTime = formatDateTime(contraction.startTime);
         const endTime = contraction.endTime ? formatDateTime(contraction.endTime) : "";
         const duration = contraction.duration !== null ? formatTime(contraction.duration) : "";
-        const interval = contraction.interval !== null ? formatTime(contraction.interval) : "";
+        const intervalFromStart = contraction.intervalFromStart !== null ? formatTime(contraction.intervalFromStart) : "";
+        const intervalFromEnd = contraction.intervalFromEnd !== null ? formatTime(contraction.intervalFromEnd) : "";
         
-        csvContent += `${index + 1},${startTime},${endTime},${duration},${interval}\n`;
+        csvContent += `${index + 1},${startTime},${endTime},${duration},${intervalFromStart},${intervalFromEnd}\n`;
       });
       
       // Create and download file
-      const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
+      link.setAttribute("href", url);
       link.setAttribute("download", `מעקב_צירים_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
       document.body.appendChild(link);
       link.click();
