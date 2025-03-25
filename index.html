@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מעקב צירים</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(to bottom, #f3e7ff, #e6f0ff);
+      min-height: 100vh;
+      padding: 1rem;
+      direction: rtl;
+    }
+    
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+    
+    h1 {
+      color: #7e22ce;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      margin-top: 10px;
+    }
+    
+    /* Timer button styles */
+    .timer-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    
+    .timer-button {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      color: white;
+      outline: none;
+      position: relative;
+    }
+    
+    .timer-button.idle {
+      background: linear-gradient(135deg, #9f7aea, #6b46c1);
+    }
+    
+    .timer-button.active {
+      background: linear-gradient(135deg, #f56565, #c53030);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+    }
+    
+    .timer-clock {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .timer-label {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
+    .timer-icon {
+      margin-bottom: 10px;
+      width: 28px;
+      height: 28px;
+    }
+    
+    /* Action buttons */
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .btn {
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.2s;
+      font-size: 14px;
+    }
+    
+    .btn-reset {
+      background-color: white;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    
+    .btn-reset:hover {
+      background-color: #f8f8f8;
+    }
+    
+    .btn-download {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .btn-download:hover {
+      background-color: #059669;
+    }
+    
+    .btn-download:disabled {
+      background-color: #cbd5e0;
+      cursor: not-allowed;
+    }
+    
+    .btn svg {
+      margin-left: 5px;
+    }
+    
+    /* Contractions list */
+    .contractions-list {
+      margin-bottom: 40px;
+    }
+    
+    .contraction-interval {
+      text-align: center;
+      color: #718096;
+      font-size: 14px;
+      margin: 8px 0;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .contraction-card {
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 15px;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .card-header {
+      font-weight: bold;
+      font-size: 16px;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 14px;
+    }
+    
+    .card-item label {
+      display: block;
+      color: #718096;
+      margin-bottom: 2px;
+    }
+    
+    .card-item span {
+      font-weight: 500;
+    }
+    
+    .empty-state {
+      text-align: center;
+      color: #718096;
+      padding: 30px 0;
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 300px;
+      z-index: 1000;
+    }
+    
+    .toast {
+      background-color: white;
+      border-radius: 8px;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease, fadeOut 0.5s ease 4.5s forwards;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .toast:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background-color: #6b46c1;
+    }
+    
+    .toast-title {
+      font-weight: bold;
+      margin-bottom: 3px;
+      font-size: 14px;
+    }
+    
+    .toast-message {
+      font-size: 13px;
+      color: #4a5568;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>מעקב צירים</h1>
+    
+    <div class="timer-container">
+      <button id="timerButton" class="timer-button idle">
+        <svg class="timer-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <div id="timer" class="timer-clock">00:00</div>
+        <div id="timerLabel" class="timer-label">התחלת ציר</div>
+      </button>
+    </div>
+    
+    <div class="actions">
+      <button id="resetButton" class="btn btn-reset">איפוס</button>
+      <button id="downloadButton" class="btn btn-download" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        הורד נתונים
+      </button>
+    </div>
+    
+    <div id="contractionsList" class="contractions-list">
+      <div class="empty-state">לחצי על כפתור "התחלת ציר" כדי להתחיל לעקוב</div>
+    </div>
+  </div>
+  
+  <div id="toastContainer" class="toast-container"></div>
+  
+  <script>
+    // Initialize variables
+    let isTracking = false;
+    let timer = 0;
+    let timerInterval = null;
+    let contractions = [];
+    
+    // Get DOM elements
+    const timerButton = document.getElementById('timerButton');
+    const timerElement = document.getElementById('timer');
+    const timerLabel = document.getElementById('timerLabel');
+    const resetButton = document.getElementById('resetButton');
+    const downloadButton = document.getElementById('downloadButton');
+    const contractionsList = document.getElementById('contractionsList');
+    const toastContainer = document.getElementById('toastContainer');
+    
+    // Format time (seconds) to MM:SS
+    function formatTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // Format date to HH:MM:SS
+    function formatDateTime(date) {
+      return date.toLocaleTimeString('he-IL', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false 
+      });
+    }
+    
+    // Toggle timer (start/stop contraction)
+    function toggleTimer() {
+      if (!isTracking) {
+        // Start contraction
+        const now = new Date();
+        const newContraction = {
+          startTime: now,
+          endTime: null,
+          duration: null,
+          interval: contractions.length > 0 
+            ? Math.floor((now.getTime() - contractions[contractions.length - 1].startTime.getTime()) / 1000) 
+            : null
+        };
+        
+        contractions.push(newContraction);
+        isTracking = true;
+        
+        // Update UI
+        timerButton.classList.remove('idle');
+        timerButton.classList.add('active');
+        timerLabel.textContent = 'סיום ציר';
+        
+        // Start timer
+        timerInterval = setInterval(() => {
+          timer++;
+          timerElement.textContent = formatTime(timer);
+        }, 1000);
+        
+        // Update contractions list
+        updateContractionsList();
+        
+        // Show toast
+        showToast('התחלת ציר', `ציר חדש התחיל ב-${formatDateTime(now)}`);
+      } else {
+        // End contraction
+        const now = new Date();
+        const currentContraction = contractions[contractions.length - 1];
+        currentContraction.endTime = now;
+        currentContraction.duration = timer;
+        
+        // Stop timer
+        clearInterval(timerInterval);
+        isTracking = false;
+        
+        // Update UI
+        timerButton.classList.remove('active');
+        timerButton.classList.add('idle');
+        timerLabel.textContent = 'התחלת ציר';
+        timerElement.textContent = '00:00';
+        
+        // Reset timer
+        timer = 0;
+        
+        // Update contractions list
+        updateContractionsList();
+        
+        // Enable download button
+        downloadButton.disabled = false;
+        
+        // Show toast
+        showToast('סיום ציר', `הציר הסתיים לאחר ${formatTime(currentContraction.duration)} דקות`);
+      }
+    }
+    
+    // Reset everything
+    function resetAll() {
+      // Reset variables
+      isTracking = false;
+      timer = 0;
+      contractions = [];
+      
+      // Clear timer interval
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      
+      // Reset UI
+      timerButton.classList.remove('active');
+      timerButton.classList.add('idle');
+      timerLabel.textContent = 'התחלת ציר';
+      timerElement.textContent = '00:00';
+      downloadButton.disabled = true;
+      
+      // Clear contractions list
+      contractionsList.innerHTML = '<div class="empty-state">לחצי על כפתור "התחלת ציר" כדי להתחיל לעקוב</div>';
+      
+      // Show toast
+      showToast('איפוס', 'המעקב אופס בהצלחה');
+    }
+    
+    // Update contractions list
+    function updateContractionsList() {
+      if (contractions.length === 0) {
+        contractionsList.innerHTML = '<div class="empty-state">לחצי על כפתור "התחלת ציר" כדי להתחיל לעקוב</div>';
+        return;
+      }
+      
+      // Clear current list
+      contractionsList.innerHTML = '';
+      
+      // Add contractions
+      contractions.forEach((contraction, index) => {
+        // Add interval info (if not first contraction)
+        if (index > 0 && contraction.interval) {
+          const intervalElement = document.createElement('div');
+          intervalElement.className = 'contraction-interval';
+          intervalElement.textContent = `הפרש: ${formatTime(contraction.interval)}`;
+          contractionsList.appendChild(intervalElement);
+        }
+        
+        // Create contraction card
+        const card = document.createElement('div');
+        card.className = 'contraction-card';
+        
+        // Card header
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        header.textContent = `ציר ${index + 1}`;
+        card.appendChild(header);
+        
+        // Card content
+        const content = document.createElement('div');
+        content.className = 'card-grid';
+        
+        // Start time
+        const startTimeElement = document.createElement('div');
+        startTimeElement.className = 'card-item';
+        const startTimeLabel = document.createElement('label');
+        startTimeLabel.textContent = 'התחלה:';
+        const startTimeValue = document.createElement('span');
+        startTimeValue.textContent = formatDateTime(contraction.startTime);
+        startTimeElement.appendChild(startTimeLabel);
+        startTimeElement.appendChild(startTimeValue);
+        content.appendChild(startTimeElement);
+        
+        // End time (if available)
+        if (contraction.endTime) {
+          const endTimeElement = document.createElement('div');
+          endTimeElement.className = 'card-item';
+          const endTimeLabel = document.createElement('label');
+          endTimeLabel.textContent = 'סיום:';
+          const endTimeValue = document.createElement('span');
+          endTimeValue.textContent = formatDateTime(contraction.endTime);
+          endTimeElement.appendChild(endTimeLabel);
+          endTimeElement.appendChild(endTimeValue);
+          content.appendChild(endTimeElement);
+        }
+        
+        // Duration (if available)
+        if (contraction.duration !== null) {
+          const durationElement = document.createElement('div');
+          durationElement.className = 'card-item';
+          const durationLabel = document.createElement('label');
+          durationLabel.textContent = 'משך:';
+          const durationValue = document.createElement('span');
+          durationValue.textContent = formatTime(contraction.duration);
+          durationElement.appendChild(durationLabel);
+          durationElement.appendChild(durationValue);
+          content.appendChild(durationElement);
+        }
+        
+        card.appendChild(content);
+        contractionsList.appendChild(card);
+      });
+    }
+    
+    // Download data as CSV
+    function downloadData() {
+      if (contractions.length === 0) return;
+      
+      // Create CSV content
+      let csvContent = "מספר ציר,זמן התחלה,זמן סיום,משך ציר (דקות:שניות),הפרש מהציר הקודם (דקות:שניות)\n";
+      
+      contractions.forEach((contraction, index) => {
+        const startTime = formatDateTime(contraction.startTime);
+        const endTime = contraction.endTime ? formatDateTime(contraction.endTime) : "";
+        const duration = contraction.duration !== null ? formatTime(contraction.duration) : "";
+        const interval = contraction.interval !== null ? formatTime(contraction.interval) : "";
+        
+        csvContent += `${index + 1},${startTime},${endTime},${duration},${interval}\n`;
+      });
+      
+      // Create and download file
+      const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `מעקב_צירים_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Show toast
+      showToast('הורדת קובץ', 'הקובץ הורד בהצלחה');
+    }
+    
+    // Show toast notification
+    function showToast(title, message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      
+      const toastTitle = document.createElement('div');
+      toastTitle.className = 'toast-title';
+      toastTitle.textContent = title;
+      
+      const toastMessage = document.createElement('div');
+      toastMessage.className = 'toast-message';
+      toastMessage.textContent = message;
+      
+      toast.appendChild(toastTitle);
+      toast.appendChild(toastMessage);
+      
+      toastContainer.appendChild(toast);
+      
+      // Remove toast after animation
+      setTimeout(() => {
+        toast.remove();
+      }, 5000);
+    }
+    
+    // Add event listeners
+    timerButton.addEventListener('click', toggleTimer);
+    resetButton.addEventListener('click', resetAll);
+    downloadButton.addEventListener('click', downloadData);
+  </script>
+</body>
+</html>
